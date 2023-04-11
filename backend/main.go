@@ -8,14 +8,6 @@ import (
 	"github.com/gookit/ini/v2"
 )
 
-type OauthTokenResp struct {
-	token_type               string
-	scope                    string
-	refresh_token_expires_in int
-	refresh_token            string
-	expires_in               int
-}
-
 func hello(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Fprintf(w, "hello\n")
@@ -62,11 +54,20 @@ func loadConfig() {
 	}
 }
 
+func corsWrapper(fn func(w http.ResponseWriter, req *http.Request)) func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		fn(w, req)
+	}
+}
+
 func main() {
 	loadConfig()
 
-	http.HandleFunc("/echo", hello)
-	http.HandleFunc("/auth", getAccessToken)
+	http.HandleFunc("/echo", corsWrapper(hello))
+	http.HandleFunc("/auth", corsWrapper(getAccessToken))
 
 	http.ListenAndServe(":8090", nil)
 }
