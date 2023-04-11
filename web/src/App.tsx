@@ -1,35 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import viteLogo from "/vite.svg";
+import "./App.css";
+import { useEffect } from "react";
+import qs from 'qs';
+import { getAuthToken } from "./axios";
+import { isString } from 'lodash';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    const initLogin = async () => {
+      const { code } = qs.parse(window.location.search);
+      if (code && isString(code)) {
+        const  getAuthToken({
+          code,
+        })
+      }
+    }
+  }, []);
 
   return (
     <div className="App">
       <div>
-        <a href="https://vitejs.dev" target="_blank">
+        <a
+          href={`https://github.com/login/oauth/authorize?client_id=Iv1.432545adc4712e84&state=abcdefg&redirect_uri=${decodeURIComponent(
+            "http://localhost:5173"
+          )}`}
+          target="_blank"
+        >
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Login with GitHub</h1>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
