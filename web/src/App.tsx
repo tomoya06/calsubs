@@ -9,6 +9,8 @@ import { Avatar, Form, Space, Input, Button, message } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { LunarBirthdayData } from "./types/birthdays";
 
+const datereg = /^\d\d\d\d\.\d\d\.\d\d$/;
+
 function App() {
   const [hasLogin, setLogin] = useState(false);
   const [userInfo, setUserInfo] = useState<GhUserInfo | null>(null);
@@ -45,8 +47,24 @@ function App() {
     initLogin();
   }, []);
 
-  const onFinish = (values: LunarBirthdayData) => {
-    console.log("Received values of form:", values);
+  const onFinish = (values: { birthdays: LunarBirthdayData[] }) => {
+    const output = window.generateIcsContent(
+      JSON.stringify({
+        bds: values.birthdays.map((val) => {
+          const regmap = datereg.exec(val.date)!;
+
+          return {
+            yy: Number(regmap[1]),
+            mm: Number(regmap[2]),
+            dd: Number(regmap[3]),
+            name: val.name,
+          };
+        }),
+        remindAt: 12,
+      })
+    );
+
+    console.log({ output });
   };
 
   const LoginEntry = useMemo(() => {
@@ -86,7 +104,7 @@ function App() {
                     rules={[
                       { required: true, message: "填入农历日期" },
                       {
-                        pattern: /^\d\d\d\d\.\d\d\.\d\d$/,
+                        pattern: datereg,
                         message: "请输入正确的日期格式",
                       },
                     ]}
