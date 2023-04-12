@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GhUserInfo } from "./types/github";
+import { GhCreateGistResp, GhGistResp, GhUserResp } from "./types/github";
 import qs from "qs";
 import { isString } from "lodash";
 
@@ -19,7 +19,7 @@ const githubService = axios.create({
   baseURL: "https://api.github.com",
 });
 
-export const loginProcedure = async (): Promise<GhUserInfo | undefined> => {
+export const loginProcedure = async (): Promise<GhUserResp | undefined> => {
   let access_token = localStorage.getItem("access_token");
 
   async function tryGetUser() {
@@ -86,4 +86,19 @@ const unsetGithubBearer = () => {
   delete githubService.defaults.headers["X-GitHub-Api-Version"];
 };
 
-const getUserInfo = () => githubService.get<GhUserInfo>("/user");
+const getUserInfo = () => githubService.get<GhUserResp>("/user");
+export const listGists = () => githubService.get<GhGistResp>("/gists");
+export const createGist = (params: {
+  content: string;
+  filename: string;
+  description: string;
+}) =>
+  githubService.post<GhCreateGistResp>("/gists", {
+    description: params.description,
+    public: true,
+    files: {
+      [params.filename]: {
+        content: params.content,
+      },
+    },
+  });
