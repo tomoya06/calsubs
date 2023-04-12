@@ -2,8 +2,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import { useEffect, useMemo, useState } from "react";
 import qs from "qs";
-import { getAuthToken, getUserInfo, updateGithubBearer } from "./axios";
-import { isString } from "lodash";
+import { loginProcedure } from "./axios";
 import { GhUserInfo } from "./types/github";
 import { Avatar, Form, Space, Input, Button, message } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
@@ -12,35 +11,20 @@ import { LunarBirthdayData } from "./types/birthdays";
 const datereg = /^\d\d\d\d\.\d\d\.\d\d$/;
 
 function App() {
-  const [hasLogin, setLogin] = useState(false);
   const [userInfo, setUserInfo] = useState<GhUserInfo | null>(null);
   const [isLoading, setLoading] = useState(false);
 
+  const hasLogin = useMemo(() => Boolean(userInfo), [userInfo]);
+
   useEffect(() => {
     const initLogin = async () => {
-      const { code } = qs.parse(window.location.search, {
-        ignoreQueryPrefix: true,
-      });
-      if (!isString(code)) {
-        return;
-      }
-      const tokenResp = await getAuthToken({
-        code,
-      });
-      const { access_token } = tokenResp.data;
-      if (!isString(access_token)) {
-        return;
-      }
-      updateGithubBearer(access_token);
+      setLoading(true);
 
-      try {
-        setLoading(true);
-        const userInfo = await getUserInfo();
-        setUserInfo(userInfo.data);
-        setLogin(true);
-      } catch (error) {
-        message.error("获取 GitHub 账户失败，请重新登录");
+      const userinfo = await loginProcedure();
+      if (userinfo) {
+        setUserInfo(userinfo);
       }
+
       setLoading(false);
     };
 
